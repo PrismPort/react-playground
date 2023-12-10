@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>nm</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Don't use this in production: -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+  <div id="util"></div>
+  <div id="root"></div>
+  <script type="text/babel">
+    function ListItem({ obj_value, key_name }) {
+      return (
+        <li>{key_name}: {obj_value}</li>
+      );
+    }
+
+    function Doc({ obj }) {
+      const data = new Array();
+      for (const obj_key in obj) {
+        const element = obj[obj_key];
+        if (element instanceof Object) {
+          data.push(
+            <>
+              <ListItem
+                obj_value={""}
+                key_name={obj_key}
+              />
+              <Doc
+                obj={element}
+              />
+            </>
+          );
+        } else {
+          data.push(
+            <ListItem
+              obj_value={obj[obj_key]}
+              key_name={obj_key}
+            />
+          );
+        }
+      }
+      const entries = data
+      //data.map(element => <li>{element}</li> );
+      // recurse(obj, entries);
+      // function recurse(obj, entries) {
+      //   for (const element in obj) {
+      //     console.log(element)
+      //     console.log(entries)
+      //     if (obj[element] instanceof Object) {
+      //       console.log("is obj : " + obj[element])
+      //       recurse(obj[element], entries)
+      //   } else {
+      //     console.log("is not : " + obj[element])
+      //     entries.push(<li>{element + " : " + obj[element]}</li>);
+      //   }
+      // }
+      return (
+        <>
+          <ul>{data}</ul>
+        </>
+      )
+    }
+    function Slider({ values }) {
+      function Lines({ x, y, height }) {
+        //                <line x0={x} x1={x + 10} y0={y} y1={y + height} ></line>
+        return (
+          <>
+            <line x0="0" x1="0" y0="1000" y1="1290"></line>
+          </>
+        );
+      }
+      return (
+        <>
+          <Lines
+            x={100}
+            y={100}
+            height={100} />
+          <input type="range"></input>
+        </>
+      )
+    }
+    function ASlider({ obj }) {
+
+      return (
+        <>
+          <p>{obj._id} {obj.name}</p>
+        </>
+      );
+    }
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    const input = document.createElement("input");
+    let jsoon, things;
+    input.type = "file";
+    input.addEventListener("change", async e => {
+      let json;
+      try {
+        json = JSON.parse(await input.files[0].text());
+      } catch {
+        const list = await input.files[0].text();
+        const short_list = []
+        const long_list = list.split('\n')
+        for (let i = 0; i < 50000000 && i < long_list.length-1; i++) {
+          // console.log("1", JSON.parse(long_list[i]))
+          short_list.push(JSON.parse(long_list[i]));
+        }
+        json = []
+        for (const item of short_list) {
+          try {
+            // console.log(item)
+            json.push(item)
+          } catch {
+            console.warn("cannot parse this: ", item)
+          }
+        }
+        // json = short_list
+        //   .map(item => {
+        //     try {
+        //       return JSON.parse(item)
+        //     } catch {
+        //       console.warn("cannot parse", item)
+        //     }
+        //   });
+        class Fingerprint {
+          constructor(keys) {
+            this.raw_signature = Object.keys(keys).sort();
+            this.signature = JSON.stringify(this.raw_signature);
+          }
+        }
+        class Things {
+          constructor(map) {
+            this.map = map;
+          }
+          obj() {
+            const overview = {};
+            this.map.forEach((value, key, map) => {
+              overview[key] = { length: value.length }
+            })
+            return overview;
+          }
+        }
+        const fingers = new Map();
+
+
+
+        const some_map = new Map();
+        short_list.forEach((item) => {
+          const item_fingerprint = JSON.stringify(Object.getOwnPropertyNames(item).sort());
+          if (some_map.has(item_fingerprint)) {
+            some_map.get(item_fingerprint).push(item);
+          } else {
+            some_map.set(item_fingerprint, [item]);
+          }
+        });
+        things = new Things(some_map);
+        console.log(some_map.size)
+        for (const fingerprint of some_map.keys()) {
+          console.log(fingerprint)
+        }
+      }
+
+      root.render(
+        <>
+          <Doc
+            obj={things.obj()}
+          />
+        </>
+      );
+
+    })
+    document.querySelector("#util").append(input)
+    root.render(
+      <>
+        <ASlider
+          obj={{ _id: 1234, name: "dude" }}
+        />
+        <Doc
+          obj={{ j: jsoon }}
+        />
+        <Doc
+          obj={{
+            _id: "1234",
+            name: "dude",
+            bros: [
+              {
+                _id: "12345",
+                name: "chad"
+              },
+              {
+                _id: "12346",
+                name: "chug"
+              },
+              {
+                _id: "12347",
+                name: "chris"
+              },
+              {
+                _id: "12348",
+                name: "cj", bros: [
+                  {
+                    _id: "12345",
+                    name: "chad"
+                  },
+                  {
+                    _id: "12346",
+                    name: "chug"
+                  },
+                  {
+                    _id: "12347",
+                    name: "chris"
+                  },
+                  {
+                    _id: "12348",
+                    name: "cj",
+                    bros: [
+                      {
+                        _id: "12345",
+                        name: "chad"
+                      },
+                      {
+                        _id: "12346",
+                        name: "chug"
+                      },
+                      {
+                        _id: "12347",
+                        name: "chris"
+                      },
+                      {
+                        _id: "12348",
+                        name: "cj",
+                        bro: {
+                          _id: "1234567",
+                          name: "kurt"
+                        }
+                      },
+                      {
+                        _id: "12349",
+                        name: "joe"
+                      }
+                    ]
+                  },
+                  {
+                    _id: "12349",
+                    name: "joe"
+                  }
+                ]
+              },
+              {
+                _id: "12349",
+                name: "joe"
+              }
+            ]
+          }}
+        />
+
+      </>
+    );
+
+  </script>
+  <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      Read this page for starting a new React project with JSX:
+      https://react.dev/learn/start-a-new-react-project
+
+      Read this page for adding React with JSX to an existing project:
+      https://react.dev/learn/add-react-to-an-existing-project
+    -->
+</body>
+
+</html>
